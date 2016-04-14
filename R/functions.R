@@ -9,4 +9,4 @@ gamma_plot <- function(gamma_a,gamma_b){
   return(qplot(temp_seq,dgamma(temp_seq,gamma_a,gamma_b),xlab="Value",ylab="Probability density"))
 }
 
-#hello
+#helloooooooooooooooooo
