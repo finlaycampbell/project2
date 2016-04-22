@@ -1,12 +1,25 @@
 #DEFINING FUNCTIONS
 
-say_hello <- function(your_name){
-  return(paste("Hello ",your_name,", how are you doing?",sep=""))
+##Visualising simOutbreak
+plot.simOutbreak <- function(R0=2,gamma_a=4,gamma_b=1){
+  library(igraph)
+  library(network)
+  
+  temp.sim = simOutbreak(1.8,dgamma(1:10,4,1))
+  temp.net = graph.data.frame(cbind(temp.sim$ances,temp.sim$id),directed=T)
+  return(plot(temp.net))
 }
 
-gamma_plot <- function(gamma_a,gamma_b){
-  temp_seq = seq(0,10,0.01)
-  return(qplot(temp_seq,dgamma(temp_seq,gamma_a,gamma_b),xlab="Value",ylab="Probability density"))
+##Returns the genetic pseudo-likelihood using the number of genetic differences, length of comparable genome,
+##number of generations and mutation rate
+mu.func = function(d,l,k,u){
+  return(u^(d)*(1-u)^(k*l - d))
 }
 
-#helloooooooooooooooooo
+##Plots the likelihood given fixed d, l and k across a range of values for u, returning most likely u value
+plot.mu.func = function(d,l,k){
+temp.seq = seq(0,1,0.01)
+temp.output = mu.func(d,l,k,temp_seq)
+plot(temp.seq,temp/output,type='l')
+return(temp.seq[which.max(temp.output)])
+}
