@@ -1,6 +1,9 @@
 source("R/functions.R")
 
 library(ggplot2)
+library(igraph)
+library(network)
+library(outbreaker)
 
 ##Constructing simulated genomes and collection dates for use by outbreaker
 test.dna = matrix(c("C","C","C","C","C","C","C","C","C",

@@ -2,11 +2,9 @@
 
 ##Visualising simOutbreak
 plot.simOutbreak <- function(R0=2,gamma_a=4,gamma_b=1){
-  library(igraph)
-  library(network)
-  
-  temp.sim = simOutbreak(1.8,dgamma(1:10,4,1))
-  temp.net = graph.data.frame(cbind(temp.sim$ances,temp.sim$id),directed=T)
+  temp.sim = simOutbreak(R0,dgamma(1:10,4,1))
+  if(length(temp.sim$id)==1) return("No outbreak")
+  temp.net = graph.data.frame(cbind(temp.sim$ances[-1],temp.sim$id[-1]),directed=T)
   return(plot(temp.net))
 }
 
