@@ -1,0 +1,163 @@
+\documentclass{beamer}
+\usepackage[utf8]{inputenc}
+\mode<presentation>
+{
+ %\usetheme{Singapore}
+\usetheme{Singapore}
+}
+
+%% remove navigation symbols
+\setbeamertemplate{navigation symbols}{}
+
+%% add page number
+\addtobeamertemplate{footline}{\hfill\insertframenumber/\inserttotalframenumber\hspace{1em}\vspace{.5em}\null}
+
+%% handle transparency
+\setbeamercovered{transparent=20}
+
+% language
+\usepackage[english]{babel}
+
+% Sweave version perso
+% \usepackage{/home/thibaut/latex/Sweave/Sweaveperso}
+
+
+% pour les images
+\usepackage{graphicx}
+% pour les espaces entre les lignes : 1, 1.5, 2
+\usepackage{setspace}
+% pour les marges
+\usepackage{geometry}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+% pour les couleurs
+\usepackage{color}
+% pour mettre des url
+\usepackage{url}
+\usepackage[all]{xy}
+\usepackage{bm}
+% biblio exotique
+\usepackage{natbib}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\beq}{\begin{equation}}
+\newcommand{\eeq}{\end{equation}}
+\newcommand{\m}[1]{\mathbf{#1}}
+\newcommand{\rcmd}[1]{\textcolor{red}{\texttt{#1}}}
+\newcommand{\code}[1]{{{\tt #1}}}
+
+\newcommand{\Rcmd}[1]{
+%	\begin{columns}[c]
+%		\column{0.2\textwidth}
+%		\column{0.5cm}
+%		\includegraphics[width=.5cm]{figs/Rinvit.png}
+%		\column{0.8\textwidth}
+%		\alert{\scriptsize \texttt{#1}}
+%	\end{columns}
+}
+
+\newcommand{\Rlogo}{
+		\includegraphics[width=.5cm]{figs/Rlogo-transp.png}
+}
+
+
+
+\definecolor{gris}{gray}{0.45}
+
+\title[~]{Introduction to package development using \Rlogo}
+\author[~]{\textbf{Thibaut Jombart}}
+
+\institute{MRC Centre for Outbreak Analysis and Modelling\\ Imperial College London}
+
+\date[~]{~}
+
+
+%% Pour rappeler le plan a chaque changement de subsection.
+\AtBeginSection[]
+{
+ \begin{frame}<beamer>
+   \frametitle{Plan}
+   % \tableofcontents[currentsection,currentsubsection]
+   \tableofcontents[currentsection]
+ \end{frame}
+}
+
+% \AtBeginSubsection[]
+% {
+%  \begin{frame}<beamer>
+%    \frametitle{Plan}
+%    % \tableofcontents[currentsection,currentsubsection]
+%    \tableofcontents[currentsubsection]
+%  \end{frame}
+% }
+
+
+%% % Pour rappeler le plan a chaque changement de subsection.
+%% \AtBeginSubsection[]
+%% {
+%%    \begin{frame}
+%%        \frametitle{Outline}
+%%        \tableofcontents[currentsection,currentsubsection]
+%%    \end{frame}
+%% }
+
+
+
+%% % Pour rappeler le plan a chaque changement de section.
+%% \AtBeginSection[]
+%% {
+%%   \begin{frame}<beamer>
+%%     \frametitle{Outline}
+%%     \tableofcontents[currentsection]
+%%   \end{frame}
+%% }
+
+%% \AtBeginSubsection[]
+%% {
+%%   \begin{frame}<beamer>
+%%     \frametitle{Outline}
+%%     \tableofcontents[currentsubsection]
+%%   \end{frame}
+%% }
+
+\usefonttheme[onlymath]{serif}
+
+
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+
+%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%
+\maketitle
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}[fragile]
+  \frametitle{Outline}
+\tableofcontents[
+  sectionstyle=show,
+  subsectionstyle=hide
+  ]
+\end{frame}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%
+% pas de sections
+%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%
+
+%% Sweave options and colors
+
+\begin{Schunk}
+\begin{Sinput}
+> rm(list=ls())
+> opts_chunk$set(fig.path='figs/introToR-', fig.keep='high', dev='pdf', fig.width=7, fig.height=7,
++                tidy=FALSE, warning=FALSE, fig.show="asis", fig.align='center', out.width=".5\\textwidth",
++                size='scriptsize', prompt=TRUE, comment="", warning=FALSE, message=FALSE)

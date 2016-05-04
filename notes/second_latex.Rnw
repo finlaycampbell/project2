@@ -1,0 +1,53 @@
+\documentclass{article}
+\usepackage{graphicx}
+\graphicspath{ {C:/Users/Finlay/Pictures/} }
+
+
+\begin{document}
+
+\title{My First Document}
+\author{Finlay Campbell}
+
+\maketitle
+
+\begin{abstract}
+	How are you doing, LaTeX?
+\end{abstract}
+
+\section{Introduction}
+	This is the introduction of my first LaTeX document, I hope you enjoy it.
+	
+\begin{equation}
+	\label{This is an equation}	
+	\alpha = \sqrt{ \beta }
+\end{equation}
+	
+\subsection{Finlay}
+	This is first subsection of my first LaTeX document; I hope you enjoy this, too.
+
+\section{Second Section}
+	This is hopefully a big section,\newline bigger than our Subsection 1
+
+\begin{figure}[!ht]
+	\centering
+	\includegraphics[width=3.0in]{Model.png}
+	\caption{I don't think we have a figure yet}
+	\label{Our Figure}
+\end{figure}
+
+\section{Using Sweave to combine R and LaTeX}
+	Below we should see a plot rendered using R code
+
+<<>>=
+	library(ggplot2)
+	qplot(seq(0,10,0.01),dgamma(seq(0,10,0.01),2,2))
+
+@
+	Now we should be seeing normal text again. 
+
+
+\section{Conclusion}
+	This is the conclusion. 
+	I hope you enjoyed this LaTeX document, come again. 
+
+\end{document}
