@@ -6,41 +6,49 @@
 
 
 
-#' simCTD returns a simulated contact tracing data set, given the known transmission network
+#' simCTD returns a simulated contact tracing data (CTD) set, given the known transmission network
 #' @param temp.outbreak the known or simulated dataset of type simOutbreak
 #' @param eps the contact tracing coverage
 #' @param avg.contact the average number of total (infectious and non-infectious) contacts
 #' @param N the total number of individuals in the closed system
+#' @param plot a boolean determining if the simulated CTD should be plotted as a network
+#' @param true.reported a boolean determining if the proportion of infectious contacts reported should be printed
 
-simCTD <- function(temp.outbreak,eps=1,avg.contact=10,N=1000){
+simCTD <- function(temp.outbreak,eps=1,avg.contact=10,N=1000,plot=FALSE,infec.reported=FALSE){
   
-  generate.contact <- function(id){
+  #generate.CTD returns a matrix of CTD for a single id from temp.outbreak
+  generate.CTD <- function(id){
     num.contact <- rbinom(1,avg.contact*2,0.5)
 
-    certain.contact <- which(temp.outbreak$ances==id)
+    infec.contact <- which(temp.outbreak$ances==id)
     
-    potent.contact <- (1:N)[-c(id,certain.contact)]
-    
-    if(length(certain.contact)>num.contact) num.contact <- length(certain.contact)
-    
-    potent.contact <- sample(potent.contact,num.contact-length(certain.contact))
+    #If num.contact < num.infec.contact, set num.contact = num.infect.contact to force reporting of infectious contacts
+    if(num.contact<length(infec.contact)) num.contact <- length(infec.contact)
     
     if(num.contact==0) return(NULL)
     
-    return(matrix(c(rep(id,num.contact),certain.contact,potent.contact),nrow=num.contact))
+    potential.non.infec.contact <- (1:N)[-c(id,infec.contact)]
+    
+    non.infec.contact <- sample(potential.non.infec.contact,num.contact-length(infec.contact))
+    
+    return(matrix(c(rep(id,num.contact),infec.contact,non.infec.contact),nrow=num.contact))
   }
 
-  true.contact <- lapply(temp.outbreak$id,generate.contact)
+  full.CTD <- lapply(temp.outbreak$id,generate.CTD)
   
-  true.contact <- as.data.frame(do.call(rbind,true.contact))
+  full.CTD <- as.data.frame(do.call(rbind,full.CTD))
   
-  if(nrow(true.contact)==0) return("No contacts")
+  if(nrow(full.CTD)==0) return("No contacts")
   
-  colnames(true.contact) = c("id","contact")
+  colnames(full.CTD) = c("id","contact")
   
-  report.contact <- true.contact[sample(nrow(true.contact),eps*nrow(true.contact)),]
+  obsv.CTD <- full.CTD[sample(nrow(full.CTD),eps*nrow(full.CTD)),]
   
-  return(report.contact)
+  if(plot) plot(graph.data.frame(obsv.CTD))
+  
+  if(infec.reported) print(paste("Infectious contacts reported: ",round(infec.contact.reported(temp.outbreak,obsv.CTD)*100,0),"%",sep=""))
+  
+  return(obsv.CTD)
 }
 
 
@@ -77,8 +85,7 @@ omega.3 <- function(cij,eps){
 #' @param gamma_a the shape value of the gamma function used for w.dens
 #' @param gamma_b the rate values of the gamma function used for w.dens
 
-plot.simOutbreak <- function(R0=2,gamma_a=4,gamma_b=1){
-  temp.outbreak <- simOutbreak(R0,dgamma(1:10,gamma_a,gamma_b))
+plot.simOutbreak <- function(temp.outbreak){
   if(length(temp.outbreak$id)==1) return("No outbreak")
   temp.net <- graph.data.frame(cbind(temp.outbreak$ances[-1],temp.outbreak$id[-1]),directed=T)
   return(plot(temp.net))
