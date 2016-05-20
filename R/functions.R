@@ -4,17 +4,57 @@
 #' 
 #' @author F. Campbell
 
+simCTD <- function(temp.outbreak,eps=1,chi=1,ksi=0,plot=FALSE,print.ratio=FALSE){
+  
+  is.contact <- function(pair) return(any(pair[1] == infec.contact[,1] & pair[2] == infec.contact[,2]))
+  
+  accept.reject <- function(pair){
+    if(pair[3]) return(runif(1,0,1) < chi*eps)
+    else return(runif(1,0,1) < ksi.func(temp.outbreak$n,ksi,length(na.contact))*eps)
+  }
+  
+  ksi.func <- function(N,ratio,k=1){
+    
+    #ksi is probability of a contact between two non-epidemiologically related individuals, but which
+    #are both infected at some point
+    #Given N cases;
+    #we have n infectious contacts (n = N-k for (k = 1 for seeding + number of imports))
+    #the expected number of false positives is (NC2-n)*ksi
+    #the ratio of un/in is therefore (NC2-n)*ksi/n = ratio
+    #ksi = n*ratio/(NC2-n)
+    
+    n = N - k
+    return(n*ratio/(ncol(combn(N,2))-n))
+  }
+  
+  na.contact <- which(is.na(temp.outbreak$ances))
+  infec.contact <- cbind(temp.outbreak$ances[-na.contact],temp.outbreak$id[-na.contact])
+  
+  potent.CTD <- as.data.frame(t(combn(temp.outbreak$id,2)))
+  colnames(potent.CTD) = c("i","j")
+  potent.CTD <- cbind(potent.CTD,contact=apply(potent.CTD,1,is.contact))
+  potent.CTD <- cbind(potent.CTD,accept=apply(potent.CTD,1,accept.reject))
+  
+  CTD <- potent.CTD[potent.CTD$accept,1:3]
+  
+  if(plot) plot(graph.data.frame(CTD))
+  
+  if(print.ratio) print(paste("un/in:",round(sum(!CTD$contact)/sum(CTD$contact),2)))
+  
+  return(CTD)
+}
+ 
 
 
-#' simCTD returns a simulated contact tracing data (CTD) set, given the known transmission network
+#' simCTD2 returns a simulated contact tracing data (CTD) set, given the known transmission network
 #' @param temp.outbreak the known or simulated dataset of type simOutbreak
 #' @param eps the contact tracing coverage
 #' @param avg.contact the average number of total (infectious and non-infectious) contacts
 #' @param N the total number of individuals in the closed system
 #' @param plot a boolean determining if the simulated CTD should be plotted as a network
-#' @param true.reported a boolean determining if the proportion of infectious contacts reported should be printed
+#' @param infec.reported a boolean determining if the proportion of infectious contacts reported should be printed
 
-simCTD <- function(temp.outbreak,eps=1,avg.contact=10,N=1000,plot=FALSE,infec.reported=FALSE){
+simCTD2 <- function(temp.outbreak,eps=1,avg.contact=10,N=1000,plot=FALSE,infec.reported=FALSE){
   
   #generate.CTD returns a matrix of CTD for a single id from temp.outbreak
   generate.CTD <- function(id){
@@ -76,6 +116,29 @@ infec.contact.reported <- function(temp.outbreak,temp.CTD){
 
 omega.3 <- function(cij,eps){
   return(eps^cij + eps*(cij-1))
+}
+
+
+
+#' ll.CTD returns the pseudo-likelihood of proposed CTD given the actual, observed CTD
+ll.CTD <- function(actual.CTD,prop.contact,eps){
+  
+  omega.3.cij <- function(actual.CTD,prop.cij,eps){
+    cij <- which(actual.CTD$id==prop.cij[1] & actual.CTD$ances==prop.cij[2])
+    cij <- length(cij)
+    
+    if(cij > 1) {return(print("Double contact reported"));return(NA)}
+    
+    return(eps^cij + eps*(cij-1))
+  }
+  
+  temp.ll = 1
+  
+  for(i in 1:nrow(prop.contact)){
+    temp.ll <- temp.ll*omega.3.cij(actual.CTD,prop.contact[i,],eps)
+  }
+  
+  return(temp.ll)
 }
 
 
