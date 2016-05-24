@@ -10,34 +10,24 @@ simCTD <- function(temp.outbreak,eps=1,chi=1,ksi=0,plot=FALSE,print.ratio=FALSE)
   
   accept.reject <- function(pair){
     if(pair[3]) return(runif(1,0,1) < chi*eps)
-    else return(runif(1,0,1) < ksi.func(temp.outbreak$n,ksi,length(na.contact))*eps)
+    else return(runif(1,0,1) < ksi*eps)
   }
-  
-  ksi.func <- function(N,ratio,k=1){
-    
-    #ksi is probability of a contact between two non-epidemiologically related individuals, but which
-    #are both infected at some point
-    #Given N cases;
-    #we have n infectious contacts (n = N-k for (k = 1 for seeding + number of imports))
-    #the expected number of false positives is (NC2-n)*ksi
-    #the ratio of un/in is therefore (NC2-n)*ksi/n = ratio
-    #ksi = n*ratio/(NC2-n)
-    
-    n = N - k
-    return(n*ratio/(ncol(combn(N,2))-n))
-  }
-  
+
   na.contact <- which(is.na(temp.outbreak$ances))
   infec.contact <- cbind(temp.outbreak$ances[-na.contact],temp.outbreak$id[-na.contact])
   
   potent.CTD <- as.data.frame(t(combn(temp.outbreak$id,2)))
-  colnames(potent.CTD) = c("i","j")
+  colnames(potent.CTD) = c("from","to")
   potent.CTD <- cbind(potent.CTD,contact=apply(potent.CTD,1,is.contact))
   potent.CTD <- cbind(potent.CTD,accept=apply(potent.CTD,1,accept.reject))
   
   CTD <- potent.CTD[potent.CTD$accept,1:3]
   
-  if(plot) plot(graph.data.frame(CTD))
+  if(plot){
+    nodes = data.frame(id=CTD$from)
+    edges = data.frame(from=CTD$from,to=CTD$to,dashes=!CTD$contact)
+    visNetwork(nodes,edges,width="100%")
+  }
   
   if(print.ratio) print(paste("un/in:",round(sum(!CTD$contact)/sum(CTD$contact),2)))
   

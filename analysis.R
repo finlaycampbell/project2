@@ -1,6 +1,7 @@
 source("R/functions.R")
 
 library(igraph)
+library(visNetwork)
 library(outbreaker)
 
 
@@ -8,7 +9,7 @@ library(outbreaker)
 temp.outbreak <- simOutbreak(1.5,dgamma(1:10,4,1),n.hosts=20)
 plot.simOutbreak(temp.outbreak)
 
-temp.CTD <- simCTD(temp.outbreak,eps=1,chi=1,ksi=0.05,plot=TRUE)
+temp.CTD <- simCTD(temp.outbreak,eps=1,chi=1,ksi=0,plot=TRUE)
 
 
 actual.outbreak <- simOutbreak(1.5,dgamma(1:10,4,1),n.hosts=10)
