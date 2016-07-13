@@ -6,15 +6,17 @@
 
 simCTD <- function(temp.outbreak,eps=1,chi=1,ksi=0,plot=FALSE,print.ratio=FALSE){
   
+  if(temp.outbreak$n==1) return("No transmission observed")
+  
   is.contact <- function(pair) return(any(pair[1] == infec.contact[,1] & pair[2] == infec.contact[,2]))
   
   accept.reject <- function(pair){
     if(pair[3]) return(runif(1,0,1) < chi*eps)
-    else return(runif(1,0,1) < ksi*eps)
+    else return(runif(1,0,1) < ksi*chi*eps)
   }
-
-  na.contact <- which(is.na(temp.outbreak$ances))
-  infec.contact <- cbind(temp.outbreak$ances[-na.contact],temp.outbreak$id[-na.contact])
+  
+  import <- which(is.na(temp.outbreak$ances))
+  infec.contact <- cbind(temp.outbreak$ances[-import],temp.outbreak$id[-import])
   
   potent.CTD <- as.data.frame(t(combn(temp.outbreak$id,2)))
   colnames(potent.CTD) = c("from","to")
@@ -23,18 +25,34 @@ simCTD <- function(temp.outbreak,eps=1,chi=1,ksi=0,plot=FALSE,print.ratio=FALSE)
   
   CTD <- potent.CTD[potent.CTD$accept,1:3]
   
-  if(plot){
-    nodes = data.frame(id=CTD$from)
-    edges = data.frame(from=CTD$from,to=CTD$to,dashes=!CTD$contact)
-    visNetwork(nodes,edges,width="100%")
-  }
+  plot.CTD <- potent.CTD[potent.CTD$accept | potent.CTD$contact,]
   
   if(print.ratio) print(paste("un/in:",round(sum(!CTD$contact)/sum(CTD$contact),2)))
   
+  if(plot){
+    #nodes.color <- gray.colors(temp.outbreak$n,start=0,end=0.9)
+
+    nodes.color <- gray(1/3+2*temp.outbreak$onset/(3*tail(temp.outbreak$onset,1)))
+    nodes.color[import] <- "#e60000"
+
+    nodes.label = temp.outbreak$id
+    
+    edges.color <- rep("#e60000",nrow(plot.CTD))
+    edges.color[!plot.CTD$contact] <- "blue"
+    edges.arrows <- rep("to",nrow(plot.CTD))
+    edges.dashes <- plot.CTD$contact & !plot.CTD$accept
+    edges.width <- rep(3,nrow(plot.CTD))
+    edges.width[!plot.CTD$accept]  <- 0.5
+    
+    nodes <- data.frame(id=temp.outbreak$id,label=nodes.label,color=nodes.color)
+    edges <- data.frame(from=plot.CTD$from,to=plot.CTD$to,dashes=edges.dashes,arrows=edges.arrows,color=edges.color,width=edges.width)
+    network <- visNetwork(nodes,edges,main="Simulated Contact Network") %>%
+      visNodes(shape="ellipse",font=list("size"=25),borderWidth=2)
+    print(network)
+  }
+  
   return(CTD)
 }
- 
-
 
 #' simCTD2 returns a simulated contact tracing data (CTD) set, given the known transmission network
 #' @param temp.outbreak the known or simulated dataset of type simOutbreak
@@ -83,23 +101,6 @@ simCTD2 <- function(temp.outbreak,eps=1,avg.contact=10,N=1000,plot=FALSE,infec.r
 
 
 
-#' infec.contact.reported function returns the proportion of infectious contacts in temp.outbreak reported by reported.contact
-#' @param temp.outbreak the known or simulated dataset of type simOutbreak
-#' @param the simulated contact tracing dataset returned by reported.contact
-
-infec.contact.reported <- function(temp.outbreak,temp.CTD){
-  
-  match.contact <- function(i){
-  return(temp.outbreak$id[which(temp.outbreak$ances==i)] %in% subset(temp.CTD$contact,temp.CTD$id==i))
-}
-
-  if(temp.outbreak$n<=1) return("No true contacts")
-  infect.contact.reported <- do.call(sum,lapply(temp.outbreak$id,match.contact))/(temp.outbreak$n-sum(is.na(temp.outbreak$ances)))
-  
-  return(infect.contact.reported)
-}
-
-
 #' omega.3 returns the likelihood of observing cij given the tracing coverage eps
 #' @param cij is a binary (0,1) describing if contact tracing is observed between i and j
 #' @param eps is the contact tracing coverage
@@ -108,19 +109,17 @@ omega.3 <- function(cij,eps){
   return(eps^cij + eps*(cij-1))
 }
 
-
-
-#' ll.CTD returns the pseudo-likelihood of proposed CTD given the actual, observed CTD
-ll.CTD <- function(actual.CTD,prop.contact,eps){
-  
-  omega.3.cij <- function(actual.CTD,prop.cij,eps){
-    cij <- which(actual.CTD$id==prop.cij[1] & actual.CTD$ances==prop.cij[2])
+omega.3.cij <- function(actual.CTD,prop.cij,eps){
+    cij <- which(actual.CTD$from==prop.cij[1] & actual.CTD$to==prop.cij[2])
     cij <- length(cij)
     
     if(cij > 1) {return(print("Double contact reported"));return(NA)}
     
     return(eps^cij + eps*(cij-1))
   }
+
+#' ll.CTD returns the pseudo-likelihood of proposed CTD given the actual, observed CTD
+ll.CTD <- function(actual.CTD,prop.contact,eps){
   
   temp.ll = 1
   
@@ -129,19 +128,6 @@ ll.CTD <- function(actual.CTD,prop.contact,eps){
   }
   
   return(temp.ll)
-}
-
-
-
-#' plot.simOutbreak plots the simulated transmission network from simOutbreak
-#' @param R0 the effective reproduction number
-#' @param gamma_a the shape value of the gamma function used for w.dens
-#' @param gamma_b the rate values of the gamma function used for w.dens
-
-plot.simOutbreak <- function(temp.outbreak){
-  if(length(temp.outbreak$id)==1) return("No outbreak")
-  temp.net <- graph.data.frame(cbind(temp.outbreak$ances[-1],temp.outbreak$id[-1]),directed=T)
-  return(plot(temp.net))
 }
 
 

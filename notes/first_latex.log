@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.15 (MiKTeX 2.9 64-bit) (preloaded format=pdflatex 2016.4.15)  18 APR 2016 11:59
+This is pdfTeX, Version 3.14159265-2.6-1.40.15 (MiKTeX 2.9 64-bit) (preloaded format=pdflatex 2016.4.15)  8 JUL 2016 11:56
 entering extended mode
 **first_latex.tex
 (first_latex.tex
@@ -97,7 +97,13 @@ File: C:/Users/Finlay/Pictures/Model.png Graphic file (type png)
 Package pdftex.def Info: C:/Users/Finlay/Pictures/Model.png used on input line 
 33.
 (pdftex.def)             Requested size: 216.81pt x 104.36116pt.
- [1
+
+Overfull \hbox (87.80658pt too wide) in paragraph at lines 41--44
+[]\OT1/cmr/m/n/10 <<fig=TRUE,echo=FALSE>>= li-brary(ggplot2) qplot(seq(0,10,0.0
+1),dgamma(seq(0,10,0.01),2,2)) 
+ []
+
+[1
 
 {C:/ProgramData/MiKTeX/2.9/pdftex/config/pdftex.map} <C:/Users/Finlay/Pictures/
 Model.png
@@ -121,7 +127,7 @@ gram Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Program File
 s/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr12.pfb><C:/Program Files/MiKTeX 
 2.9/fonts/type1/public/amsfonts/cm/cmr17.pfb><C:/Program Files/MiKTeX 2.9/fonts
 /type1/public/amsfonts/cm/cmr9.pfb>
-Output written on first_latex.pdf (2 pages, 199064 bytes).
+Output written on first_latex.pdf (2 pages, 199588 bytes).
 PDF statistics:
  44 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
